@@ -15,11 +15,13 @@ public class Checkpoint : MonoBehaviour
         // Vérifie si l'objet qui entre en collision a le tag "Truck"
         if (other.CompareTag("Truck"))
         {
+            Debug.Log("Checkpoint touché");
 
-            // Utilise la référence globale pour incrémenter la fonction de fitness
+            // Incrémenter la fonction de fitness via le GameManager
             if (gameManager != null && gameManager.neuralNetController != null)
             {
                 gameManager.neuralNetController.IncrementFitness();
+                gameManager.OnCheckpointTouched(); // Réinitialise le timer dans le GameManager
             }
 
             // Fait disparaître le checkpoint en le désactivant

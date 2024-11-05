@@ -70,7 +70,7 @@ public class TruckController : MonoBehaviour
         }
         if (isTouchingBorder)
         {
-            borderPenaltyTimer += Time.fixedDeltaTime;
+            borderPenaltyTimer += Time.deltaTime;
             if (borderPenaltyTimer >= 1f)
             {
                 neuralNetController.DecrementFitnessOnBorder();
@@ -123,7 +123,7 @@ public class TruckController : MonoBehaviour
 
         if (Mathf.Abs(moveInput) < 0.1f)
         {
-            rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, Time.fixedDeltaTime * decelerationFactor);
+            rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, Time.deltaTime * decelerationFactor);
         }
     }
 
@@ -142,13 +142,13 @@ public class TruckController : MonoBehaviour
     void ApplyGrip()
     {
         Vector3 sidewaysVelocity = Vector3.Dot(rb.velocity, transform.right) * transform.right;
-        Vector3 correctedVelocity = rb.velocity - sidewaysVelocity * grip * Time.fixedDeltaTime;
+        Vector3 correctedVelocity = rb.velocity - sidewaysVelocity * grip * Time.deltaTime;
         rb.velocity = correctedVelocity;
     }
 
     void ApplyAirResistance()
     {
-        rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, Time.fixedDeltaTime * decelerationFactor * 0.1f);
+        rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, Time.deltaTime * decelerationFactor * 0.1f);
     }
 
     void LimitSpeed()

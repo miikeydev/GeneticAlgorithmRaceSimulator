@@ -20,7 +20,6 @@ public class NeuralNetController : MonoBehaviour
 
     // Fonction de fitness
     private float fitnessScore = 0f;
-    private float fitnessTimer = 0f;
 
     void Start()
     {
@@ -31,24 +30,12 @@ public class NeuralNetController : MonoBehaviour
         outputLayer = new float[OutputSize];
     }
 
-    void Update()
-    {
-        // Incrémenter le timer avec le temps écoulé
-        fitnessTimer += Time.fixedDeltaTime;
-
-        // Si une seconde s'est écoulée, décrémenter le score de fitness
-        if (fitnessTimer >= 1f)
-        {
-            fitnessScore -= 0.5f; // Perte de 0.5 points toutes les secondes
-            fitnessTimer = 0f; // Réinitialiser le timer
-        }
-    }
-
     // Méthode pour initialiser les poids depuis le GeneticAlgorithm
     public void InitializeWeights(float[] allWeights)
     {
         // Reconstruct the weights and biases from the flat array
         int index = 0;
+
 
         // Initialize weightsInputToHidden
         weightsInputToHidden = new float[InputSize, HiddenLayerSize];
@@ -89,7 +76,7 @@ public class NeuralNetController : MonoBehaviour
     // Méthodes pour gérer la fonction de fitness
     public void IncrementFitness()
     {
-        fitnessScore += 3f; // +2 points par checkpoint touché
+        fitnessScore += 4f; 
     }
 
     public void DecrementFitnessOnBorder()
@@ -97,10 +84,14 @@ public class NeuralNetController : MonoBehaviour
         fitnessScore -= 1f; // -1 point pour toucher le tag "Border"
     }
 
+    public void ApplyEndEpisodePenalty()
+    {
+        fitnessScore -= 5f;
+    }
+
     public void ResetFitness()
     {
         fitnessScore = 0f;
-        fitnessTimer = 0f;
     }
 
     public float GetFitnessScore() // Changer en float
