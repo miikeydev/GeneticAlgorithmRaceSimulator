@@ -36,6 +36,9 @@ public class TruckController : MonoBehaviour
     private RaycastSensor raycastSensor;
     public NeuralNetController neuralNetController;
 
+    private bool isTouchingBorder = false;
+    private float borderPenaltyTimer = 0f;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -63,7 +66,16 @@ public class TruckController : MonoBehaviour
             // Contrôle par le réseau de neurones
             int actionIndex = neuralNetController.GetActionIndex();
             ExecuteAction(actionIndex);
-            Debug.Log($"[NeuralNet] Action Index choisi: {actionIndex}");
+            //Debug.Log($"[NeuralNet] Action Index choisi: {actionIndex}");
+        }
+        if (isTouchingBorder)
+        {
+            borderPenaltyTimer += Time.fixedDeltaTime;
+            if (borderPenaltyTimer >= 1f)
+            {
+                neuralNetController.DecrementFitnessOnBorder();
+                borderPenaltyTimer = 0f;
+            }
         }
     }
 
@@ -148,6 +160,24 @@ public class TruckController : MonoBehaviour
             rb.velocity = new Vector3(flatVelocity.x, rb.velocity.y, flatVelocity.z);
         }
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Border"))
+        {
+            isTouchingBorder = true;
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Border"))
+        {
+            isTouchingBorder = false;
+            borderPenaltyTimer = 0f; // Réinitialiser le timer quand il quitte le Border
+        }
+    }
+
 
     public void ExecuteAction(int actionIndex)
     {

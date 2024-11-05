@@ -6,9 +6,9 @@ public class NeuralNetController : MonoBehaviour
     public GameManager gameManager;
 
     // Configuration du réseau de neurones
-    private int inputSize;
-    private int hiddenLayerSize = 64;
-    private int outputSize = 8;
+    public int InputSize { get; private set; }
+    public int HiddenLayerSize { get; private set; } = 64;
+    public int OutputSize { get; private set; } = 8;
 
     // Modèle de réseau de neurones
     private float[,] weightsInputToHidden;
@@ -18,40 +18,132 @@ public class NeuralNetController : MonoBehaviour
     private float[] hiddenLayer;
     private float[] outputLayer;
 
+    // Fonction de fitness
+    private float fitnessScore = 0f;
+    private float fitnessTimer = 0f;
+
     void Start()
     {
         float[] raycastData = truckController.GetRaycastData();
-        inputSize = raycastData.Length + 1; // Nombre de raycasts + vitesse
+        InputSize = raycastData.Length + 1; // Nombre de raycasts + vitesse
 
-        hiddenLayer = new float[hiddenLayerSize];
-        outputLayer = new float[outputSize];
-
-        // Initialiser les poids et biais aléatoires
-        weightsInputToHidden = InitializeWeights(inputSize, hiddenLayerSize);
-        biasesHidden = InitializeBiases(hiddenLayerSize);
-        weightsHiddenToOutput = InitializeWeights(hiddenLayerSize, outputSize);
-        biasesOutput = InitializeBiases(outputSize);
+        hiddenLayer = new float[HiddenLayerSize];
+        outputLayer = new float[OutputSize];
     }
 
+    void Update()
+    {
+        // Incrémenter le timer avec le temps écoulé
+        fitnessTimer += Time.fixedDeltaTime;
 
+        // Si une seconde s'est écoulée, décrémenter le score de fitness
+        if (fitnessTimer >= 1f)
+        {
+            fitnessScore -= 0.5f; // Perte de 0.5 points toutes les secondes
+            fitnessTimer = 0f; // Réinitialiser le timer
+        }
+    }
+
+    // Méthode pour initialiser les poids depuis le GeneticAlgorithm
+    public void InitializeWeights(float[,] weightsHidden, float[] biases)
+    {
+        weightsInputToHidden = weightsHidden;
+        biasesHidden = biases;
+
+        // Initialisation des poids pour la couche cachée à la sortie
+        weightsHiddenToOutput = new float[HiddenLayerSize, OutputSize];
+        biasesOutput = new float[OutputSize];
+
+        for (int i = 0; i < HiddenLayerSize; i++)
+        {
+            for (int j = 0; j < OutputSize; j++)
+            {
+                weightsHiddenToOutput[i, j] = Random.Range(-1f, 1f); // Poids aléatoires
+            }
+        }
+
+        for (int i = 0; i < OutputSize; i++)
+        {
+            biasesOutput[i] = Random.Range(-1f, 1f); // Biais aléatoires
+        }
+    }
+
+    // Méthodes pour gérer la fonction de fitness
+    public void IncrementFitness()
+    {
+        fitnessScore += 3f; // +2 points par checkpoint touché
+    }
+
+    public void DecrementFitnessOnBorder()
+    {
+        fitnessScore -= 1f; // -1 point pour toucher le tag "Border"
+    }
+
+    public void ResetFitness()
+    {
+        fitnessScore = 0f;
+        fitnessTimer = 0f;
+    }
+
+    public float GetFitnessScore() // Changer en float
+    {
+        return fitnessScore;
+    }
+
+    // Méthode pour obtenir les poids sous forme de tableau à une dimension
+    public float[] GetWeights()
+    {
+        // Convertir les poids en un tableau à une dimension pour le stockage
+        int totalSize = (InputSize * HiddenLayerSize) + HiddenLayerSize + (HiddenLayerSize * OutputSize) + OutputSize;
+        float[] allWeights = new float[totalSize];
+        int index = 0;
+
+        // Convertir weightsInputToHidden
+        for (int i = 0; i < InputSize; i++)
+        {
+            for (int j = 0; j < HiddenLayerSize; j++)
+            {
+                allWeights[index++] = weightsInputToHidden[i, j];
+            }
+        }
+
+        // Convertir biasesHidden
+        for (int i = 0; i < HiddenLayerSize; i++)
+        {
+            allWeights[index++] = biasesHidden[i];
+        }
+
+        // Convertir weightsHiddenToOutput
+        for (int i = 0; i < HiddenLayerSize; i++)
+        {
+            for (int j = 0; j < OutputSize; j++)
+            {
+                allWeights[index++] = weightsHiddenToOutput[i, j];
+            }
+        }
+
+        // Convertir biasesOutput
+        for (int i = 0; i < OutputSize; i++)
+        {
+            allWeights[index++] = biasesOutput[i];
+        }
+
+        return allWeights;
+    }
 
     float[] CollectInputs()
     {
         float[] raycastData = truckController.GetRaycastData();
-        float[] inputs = new float[inputSize];
+        float[] inputs = new float[InputSize];
 
-        // Assurez-vous que la longueur de raycastData est correcte avant l'assignation
         for (int i = 0; i < raycastData.Length; i++)
         {
             inputs[i] = raycastData[i];
         }
 
         inputs[raycastData.Length] = truckController.GetSpeed();
-
         return inputs;
     }
-
-
 
     float[] MatrixMultiply(float[] inputs, float[,] weights, float[] biases)
     {
@@ -79,7 +171,6 @@ public class NeuralNetController : MonoBehaviour
 
     int SelectAction()
     {
-        // Sélectionner l'action avec la valeur de sortie la plus élevée
         int actionIndex = 0;
         float maxOutput = outputLayer[0];
         for (int i = 1; i < outputLayer.Length; i++)
@@ -93,43 +184,16 @@ public class NeuralNetController : MonoBehaviour
         return actionIndex;
     }
 
-    float[,] InitializeWeights(int inputSize, int outputSize)
-    {
-        float[,] weights = new float[inputSize, outputSize];
-        for (int i = 0; i < inputSize; i++)
-        {
-            for (int j = 0; j < outputSize; j++)
-            {
-                weights[i, j] = Random.Range(-1f, 1f); // Poids initialisés aléatoirement
-            }
-        }
-        return weights;
-    }
-
-    float[] InitializeBiases(int size)
-    {
-        float[] biases = new float[size];
-        for (int i = 0; i < size; i++)
-        {
-            biases[i] = Random.Range(-1f, 1f); // Biais initialisés aléatoirement
-        }
-        return biases;
-    }
-
     public int GetActionIndex()
     {
-        // Récupérer les entrées
         float[] inputs = CollectInputs();
 
         // Propagation avant (Forward Propagation)
         hiddenLayer = MatrixMultiply(inputs, weightsInputToHidden, biasesHidden);
-        ApplyActivationFunction(hiddenLayer); // Utilise ReLU pour les couches cachées
+        ApplyActivationFunction(hiddenLayer);
 
         outputLayer = MatrixMultiply(hiddenLayer, weightsHiddenToOutput, biasesOutput);
 
-        // Choisir et retourner l'action
-        int actionIndex = SelectAction();
-        return actionIndex;
+        return SelectAction();
     }
-
 }
