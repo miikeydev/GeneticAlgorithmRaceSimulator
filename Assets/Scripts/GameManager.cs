@@ -2,50 +2,58 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public bool playable = true; // Détermine si la voiture est contrôlée manuellement ou par le réseau de neurones
-    public GeneticAlgorithm geneticAlgorithm; // Référence au script GeneticAlgorithm
-    public TruckController truckController; // Référence à l'objet TruckController (la voiture)
-    public NeuralNetController neuralNetController; // Référence au NeuralNetController
-    public CheckpointManager checkpointManager; // Référence au CheckpointManager
+    public bool playable = true; // Determines if the car is manually controlled or by the neural network
+    public GeneticAlgorithm geneticAlgorithm; // Reference to the GeneticAlgorithm script
+    public TruckController truckController; // Reference to the TruckController object (the car)
+    public NeuralNetController neuralNetController; // Reference to the NeuralNetController
+    public CheckpointManager checkpointManager; // Reference to the CheckpointManager
 
-    private Vector3 initialPosition; // Position initiale de la voiture
-    private Quaternion initialRotation; // Rotation initiale de la voiture
+    private Vector3 initialPosition; // Initial position of the car
+    private Quaternion initialRotation; // Initial rotation of the car
 
-    public int numberOfIndividuals = 20; // Nombre total d'individus dans une génération
-    public float carLifetime = 5f; // Durée de vie de chaque voiture (5 secondes)
+    public int numberOfIndividuals = 20; // Total number of individuals in a generation
+    public float carLifetime = 5f; // Lifetime of each car (5 seconds)
 
-    private int currentIndividualIndex = 0; // Index de l'individu actuel
+    private int currentIndividualIndex = 0; // Index of the current individual
     private float carTimer;
 
     void Start()
     {
-        // Enregistrer la position et la rotation initiales de la voiture
+        // Record the initial position and rotation of the car
         initialPosition = truckController.transform.position;
         initialRotation = truckController.transform.rotation;
 
-        ResetCar(); // Initialiser la première voiture au début
+        // Initialize the first generation of random weights
+        geneticAlgorithm.InitializeFirstGeneration(
+            numberOfIndividuals,
+            neuralNetController.InputSize,
+            neuralNetController.HiddenLayerSize,
+            neuralNetController.OutputSize
+        );
+
+        ResetCar(); // Initialize the first car
     }
 
     void Update()
     {
-        carTimer += Time.fixedDeltaTime; // Utiliser `Time.deltaTime` pour suivre le temps de jeu
+        carTimer += Time.deltaTime; // Use `Time.deltaTime` to track game time
 
         if (carTimer >= carLifetime)
         {
-            // Sauvegarder les poids et le score de fitness de la voiture actuelle
+            // Save the weights and fitness score of the current car
             SaveCurrentCarData();
 
             currentIndividualIndex++;
 
             if (currentIndividualIndex >= numberOfIndividuals)
             {
-                // Sélectionner les meilleurs individus après la génération complète
-                geneticAlgorithm.SelectTopIndividuals();
-                currentIndividualIndex = 0; // Réinitialiser pour la nouvelle génération
-                Debug.Log("Nouvelle génération créée !");
+                // Generate a new population after the complete generation
+                geneticAlgorithm.GenerateNewPopulation();
+                currentIndividualIndex = 0; // Reset for the new generation
+                Debug.Log("New generation created!");
             }
 
-            // Réinitialiser la voiture
+            // Reset the car with new weights
             ResetCar();
         }
     }
@@ -54,33 +62,30 @@ public class GameManager : MonoBehaviour
     {
         carTimer = 0f;
 
-        // Remettre la voiture à sa position et rotation initiales
+        // Reset the position and rotation of the car
         truckController.transform.position = initialPosition;
         truckController.transform.rotation = initialRotation;
         truckController.GetComponent<Rigidbody>().velocity = Vector3.zero;
         truckController.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
 
-        // Initialiser les poids de la voiture existante
-        neuralNetController.InitializeWeights(
-            geneticAlgorithm.GenerateRandomWeights(neuralNetController.InputSize, neuralNetController.HiddenLayerSize),
-            geneticAlgorithm.GenerateRandomBiases(neuralNetController.HiddenLayerSize)
-        );
+        // Get the weights for the current individual
+        float[] weights = geneticAlgorithm.GetWeightsForIndividual(currentIndividualIndex);
+        neuralNetController.InitializeWeights(weights);
 
-        // Réinitialiser la fonction de fitness
-        neuralNetController.ResetFitness(); // Cette ligne doit bien être exécutée
+        // Reset the fitness
+        neuralNetController.ResetFitness();
         checkpointManager.ReactivateAllCheckpoints();
     }
 
-
     void SaveCurrentCarData()
     {
-        // Récupérer le score de fitness actuel
+        // Get the current fitness score
         float fitnessScore = neuralNetController.GetFitnessScore();
 
-        // Afficher la valeur de la fitness dans la console
-        Debug.Log("Score de fitness à la fin de sa vie : " + fitnessScore);
+        // Display the fitness value in the console
+        Debug.Log("Fitness score at the end of life: " + fitnessScore);
 
-        // Sauvegarder les poids et le score de fitness dans le script GeneticAlgorithm
-        geneticAlgorithm.SaveCarData(neuralNetController.GetWeights(), fitnessScore);
+        // Save the weights and fitness score in the GeneticAlgorithm script
+        geneticAlgorithm.SaveCarData(neuralNetController.GetWeights(), fitnessScore, currentIndividualIndex);
     }
 }

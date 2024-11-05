@@ -45,28 +45,46 @@ public class NeuralNetController : MonoBehaviour
     }
 
     // Méthode pour initialiser les poids depuis le GeneticAlgorithm
-    public void InitializeWeights(float[,] weightsHidden, float[] biases)
+    public void InitializeWeights(float[] allWeights)
     {
-        weightsInputToHidden = weightsHidden;
-        biasesHidden = biases;
+        // Reconstruct the weights and biases from the flat array
+        int index = 0;
 
-        // Initialisation des poids pour la couche cachée à la sortie
+        // Initialize weightsInputToHidden
+        weightsInputToHidden = new float[InputSize, HiddenLayerSize];
+        for (int i = 0; i < InputSize; i++)
+        {
+            for (int j = 0; j < HiddenLayerSize; j++)
+            {
+                weightsInputToHidden[i, j] = allWeights[index++];
+            }
+        }
+
+        // Initialize biasesHidden
+        biasesHidden = new float[HiddenLayerSize];
+        for (int i = 0; i < HiddenLayerSize; i++)
+        {
+            biasesHidden[i] = allWeights[index++];
+        }
+
+        // Initialize weightsHiddenToOutput
         weightsHiddenToOutput = new float[HiddenLayerSize, OutputSize];
-        biasesOutput = new float[OutputSize];
-
         for (int i = 0; i < HiddenLayerSize; i++)
         {
             for (int j = 0; j < OutputSize; j++)
             {
-                weightsHiddenToOutput[i, j] = Random.Range(-1f, 1f); // Poids aléatoires
+                weightsHiddenToOutput[i, j] = allWeights[index++];
             }
         }
 
+        // Initialize biasesOutput
+        biasesOutput = new float[OutputSize];
         for (int i = 0; i < OutputSize; i++)
         {
-            biasesOutput[i] = Random.Range(-1f, 1f); // Biais aléatoires
+            biasesOutput[i] = allWeights[index++];
         }
     }
+
 
     // Méthodes pour gérer la fonction de fitness
     public void IncrementFitness()

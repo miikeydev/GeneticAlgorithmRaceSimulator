@@ -2452,6 +2452,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 437590328}
+  - component: {fileID: 437590329}
   m_Layer: 0
   m_Name: Checkpoint
   m_TagString: Untagged
@@ -2507,6 +2508,18 @@ Transform:
   - {fileID: 617163738}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &437590329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 437590327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edd11242b39b6394b85474d0ba5533be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &454731270
 GameObject:
   m_ObjectHideFlags: 0
@@ -8242,7 +8255,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playable: 0
+  geneticAlgorithm: {fileID: 1781526497}
   truckController: {fileID: 33484680}
+  neuralNetController: {fileID: 558118359}
+  checkpointManager: {fileID: 437590329}
+  numberOfIndividuals: 20
+  carLifetime: 5
 --- !u!4 &1495013003
 Transform:
   m_ObjectHideFlags: 0
@@ -10570,6 +10588,52 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1761869911}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1781526496
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1781526498}
+  - component: {fileID: 1781526497}
+  m_Layer: 0
+  m_Name: GeneticAlgo
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1781526497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1781526496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99e2784a876091b42b2aad43804f2065, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fitnessScores: []
+  mutationRate: 0.1
+--- !u!4 &1781526498
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1781526496}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 45.099407, y: 27.540236, z: -64.37753}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1794131853
 GameObject:
   m_ObjectHideFlags: 0
@@ -11894,3 +11958,4 @@ SceneRoots:
   - {fileID: 437590328}
   - {fileID: 558118360}
   - {fileID: 1495013003}
+  - {fileID: 1781526498}
