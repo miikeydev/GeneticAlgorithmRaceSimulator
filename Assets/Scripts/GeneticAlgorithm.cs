@@ -101,27 +101,32 @@ public class GeneticAlgorithm : MonoBehaviour
     {
         List<float[]> newGeneration = new List<float[]>();
 
-        // Create a roulette wheel for weighted parent selection
+        // Crée une roulette pour la sélection pondérée des parents
         float totalFitness = topIndividuals.Sum(individual => individual.score);
         List<float> probabilities = topIndividuals.Select(individual => individual.score / totalFitness).ToList();
 
-        for (int i = 0; i < newPopulationSize; i++)
+        while (newGeneration.Count < newPopulationSize)
         {
-            // Select parents
+            // Sélection des parents
             float[] parent1 = SelectParent(topIndividuals, probabilities);
             float[] parent2 = SelectParent(topIndividuals, probabilities);
 
-            // Perform single-point crossover
-            float[] childWeights = Crossover(parent1, parent2);
+            // Croisement alterné pour obtenir deux enfants
+            var (child1, child2) = Crossover(parent1, parent2);
 
-            // Apply random mutation
-            Mutate(childWeights);
+            // Mutation des enfants
+            Mutate(child1);
+            Mutate(child2);
 
-            newGeneration.Add(childWeights);
+            // Ajoute les enfants à la nouvelle génération
+            newGeneration.Add(child1);
+            if (newGeneration.Count < newPopulationSize)
+                newGeneration.Add(child2); // Ajoute seulement si la taille n'est pas encore atteinte
         }
 
         return newGeneration;
     }
+
 
     // Weighted selection of a parent
     private float[] SelectParent(List<(float[] weights, float score)> individuals, List<float> probabilities)
@@ -140,16 +145,28 @@ public class GeneticAlgorithm : MonoBehaviour
     }
 
     // Single-point crossover
-    private float[] Crossover(float[] parent1, float[] parent2)
+    // Croisement alterné pour produire deux enfants
+    private (float[], float[]) Crossover(float[] parent1, float[] parent2)
     {
-        int crossoverPoint = Random.Range(0, parent1.Length);
-        float[] child = new float[parent1.Length];
+        float[] child1 = new float[parent1.Length];
+        float[] child2 = new float[parent1.Length];
+
         for (int i = 0; i < parent1.Length; i++)
         {
-            child[i] = (i < crossoverPoint) ? parent1[i] : parent2[i];
+            if (i % 2 == 0)
+            {
+                child1[i] = parent1[i]; // Enfant 1 : indices pairs de parent1
+                child2[i] = parent2[i]; // Enfant 2 : indices pairs de parent2
+            }
+            else
+            {
+                child1[i] = parent2[i]; // Enfant 1 : indices impairs de parent2
+                child2[i] = parent1[i]; // Enfant 2 : indices impairs de parent1
+            }
         }
-        return child;
+        return (child1, child2);
     }
+
 
     // Apply mutation
     private void Mutate(float[] weights)
