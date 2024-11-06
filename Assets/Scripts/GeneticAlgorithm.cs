@@ -168,4 +168,21 @@ public class GeneticAlgorithm : MonoBehaviour
     {
         return weightsStorage[index];
     }
+
+    // Ajoute cette méthode pour obtenir le meilleur individu
+    public float[] GetBestWeights()
+    {
+        // Associe les scores de fitness aux poids
+        var combinedData = weightsStorage
+            .Select((weights, index) => (weights: weights, score: fitnessScores[index]))
+            .ToList();
+
+        // Trie les individus par score de fitness décroissant
+        combinedData.Sort((a, b) => b.score.CompareTo(a.score));
+
+        // Retourne les poids du meilleur individu
+        return combinedData[0].weights;
+    }
+
+
 }

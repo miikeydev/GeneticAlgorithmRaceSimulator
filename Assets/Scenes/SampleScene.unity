@@ -8259,8 +8259,8 @@ MonoBehaviour:
   truckController: {fileID: 33484680}
   neuralNetController: {fileID: 558118359}
   checkpointManager: {fileID: 437590329}
-  numberOfIndividuals: 20
-  carLifetime: 5
+  numberOfIndividuals: 100
+  maxCheckpointTime: 3
 --- !u!4 &1495013003
 Transform:
   m_ObjectHideFlags: 0
@@ -10618,7 +10618,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fitnessScores: []
-  mutationRate: 0.1
+  mutationRate: 0.2
 --- !u!4 &1781526498
 Transform:
   m_ObjectHideFlags: 0

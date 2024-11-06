@@ -7,6 +7,9 @@ public class GameManager : MonoBehaviour
     public TruckController truckController;
     public NeuralNetController neuralNetController;
     public CheckpointManager checkpointManager;
+    public WeightManipulation weightManager; 
+
+
 
     private Vector3 initialPosition;
     private Quaternion initialRotation;
@@ -14,12 +17,14 @@ public class GameManager : MonoBehaviour
     public int numberOfIndividuals = 20;
     private int currentIndividualIndex = 0;
     private float checkpointTimer = 0f;
-    private const float maxCheckpointTime = 5f;
+    public  float maxCheckpointTime = 5f;
 
     void Start()
     {
         initialPosition = truckController.transform.position;
         initialRotation = truckController.transform.rotation;
+
+        weightManager = new WeightManipulation("best_weights.txt"); // Initialise WeightManipulation
 
         geneticAlgorithm.InitializeFirstGeneration(
             numberOfIndividuals,
@@ -54,6 +59,11 @@ public class GameManager : MonoBehaviour
 
         if (currentIndividualIndex >= numberOfIndividuals)
         {
+            // Sauvegarde le meilleur modèle après chaque génération
+            float[] bestWeights = geneticAlgorithm.GetBestWeights();
+            weightManager.SaveWeights(bestWeights, currentIndividualIndex);
+
+
             geneticAlgorithm.GenerateNewPopulation();
             currentIndividualIndex = 0;
             Debug.Log("Nouvelle génération créée !");
