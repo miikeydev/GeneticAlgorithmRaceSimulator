@@ -36,13 +36,10 @@ public class TruckController : MonoBehaviour
     private RaycastSensor raycastSensor;
     public NeuralNetController neuralNetController;
 
-    private bool isTouchingBorder = false;
-    private float borderPenaltyTimer = 0f;
-
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        raycastSensor = GetComponent<RaycastSensor>(); 
+        raycastSensor = GetComponent<RaycastSensor>();
 
         rb.centerOfMass = new Vector3(0, -0.5f, 0);
         rb.mass = 15f;
@@ -67,15 +64,6 @@ public class TruckController : MonoBehaviour
             int actionIndex = neuralNetController.GetActionIndex();
             ExecuteAction(actionIndex);
             //Debug.Log($"[NeuralNet] Action Index choisi: {actionIndex}");
-        }
-        if (isTouchingBorder)
-        {
-            borderPenaltyTimer += Time.deltaTime;
-            if (borderPenaltyTimer >= 1f)
-            {
-                neuralNetController.DecrementFitnessOnBorder();
-                borderPenaltyTimer = 0f;
-            }
         }
     }
 
@@ -165,18 +153,10 @@ public class TruckController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Border"))
         {
-            isTouchingBorder = true;
+            gameManager.HandleBorderCollision();
         }
     }
 
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Border"))
-        {
-            isTouchingBorder = false;
-            borderPenaltyTimer = 0f; // Réinitialiser le timer quand il quitte le Border
-        }
-    }
 
 
     public void ExecuteAction(int actionIndex)
@@ -189,30 +169,13 @@ public class TruckController : MonoBehaviour
             case 0: // Avancer
                 moveInput = 1f;
                 break;
-            case 1: // Reculer
-                moveInput = -1f;
-                break;
-            case 2: // Tourner à gauche (sans avancer/reculer)
-                steerInput = -1f;
-                break;
-            case 3: // Tourner à droite (sans avancer/reculer)
-                steerInput = 1f;
-                break;
-            case 4: // Avancer et tourner à gauche
-                moveInput = 1f;
-                steerInput = -1f;
-                break;
-            case 5: // Avancer et tourner à droite
+            case 1: // Avancer et tourner à droite
                 moveInput = 1f;
                 steerInput = 1f;
                 break;
-            case 6: // Reculer et tourner à gauche
-                moveInput = -1f;
+            case 2: // Avancer et tourner à gauche
+                moveInput = 1f;
                 steerInput = -1f;
-                break;
-            case 7: // Reculer et tourner à droite
-                moveInput = -1f;
-                steerInput = 1f;
                 break;
             default:
                 moveInput = 0f;
@@ -220,6 +183,7 @@ public class TruckController : MonoBehaviour
                 break;
         }
     }
+
 
     // Méthode pour obtenir la vitesse actuelle
     public float GetSpeed()

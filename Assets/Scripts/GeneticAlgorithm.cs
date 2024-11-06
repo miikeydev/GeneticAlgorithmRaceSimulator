@@ -76,7 +76,7 @@ public class GeneticAlgorithm : MonoBehaviour
     }
 
     // Select the top 10 individuals
-    public List<(float[] weights, float score)> SelectTopIndividuals(int topCount = 10)
+    public List<(float[] weights, float score)> SelectTopIndividuals(int topCount = 2)
     {
         // Associate fitness scores with weights
         var combinedData = weightsStorage
@@ -183,6 +183,4 @@ public class GeneticAlgorithm : MonoBehaviour
         // Retourne les poids du meilleur individu
         return combinedData[0].weights;
     }
-
-
 }

@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
     public TruckController truckController;
     public NeuralNetController neuralNetController;
     public CheckpointManager checkpointManager;
-    public WeightManipulation weightManager; 
+    public WeightManipulation weightManager;
 
 
 
@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
     public int numberOfIndividuals = 20;
     private int currentIndividualIndex = 0;
     private float checkpointTimer = 0f;
-    public  float maxCheckpointTime = 5f;
+    public float maxCheckpointTime = 3f;
 
     void Start()
     {
@@ -47,10 +47,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
     public void OnCheckpointTouched()
     {
         checkpointTimer = 0f;
     }
+
+
 
     void EndEpisode()
     {
@@ -88,10 +91,19 @@ public class GameManager : MonoBehaviour
         checkpointManager.ReactivateAllCheckpoints();
     }
 
+    public void HandleBorderCollision()
+    {
+        //Debug.Log("Collision avec le Border détectée. Application de la pénalité et fin de l'épisode.");
+        neuralNetController.ApplyBorderPenalty();
+        EndEpisode();
+    }
+
+
+
     void SaveCurrentCarData()
     {
         float fitnessScore = neuralNetController.GetFitnessScore();
-        Debug.Log("Score de fitness à la fin de l'épisode : " + fitnessScore);
+        //Debug.Log("Score de fitness à la fin de l'épisode : " + fitnessScore);
         geneticAlgorithm.SaveCarData(neuralNetController.GetWeights(), fitnessScore, currentIndividualIndex);
     }
 }

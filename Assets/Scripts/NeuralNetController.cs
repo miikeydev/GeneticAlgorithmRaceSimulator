@@ -8,7 +8,7 @@ public class NeuralNetController : MonoBehaviour
     // Configuration du réseau de neurones
     public int InputSize { get; private set; }
     public int HiddenLayerSize { get; private set; } = 64;
-    public int OutputSize { get; private set; } = 8;
+    public int OutputSize { get; private set; } = 3;
 
     // Modèle de réseau de neurones
     private float[,] weightsInputToHidden;
@@ -76,7 +76,7 @@ public class NeuralNetController : MonoBehaviour
     // Méthodes pour gérer la fonction de fitness
     public void IncrementFitness()
     {
-        fitnessScore += 4f; 
+        fitnessScore += 4f;
     }
 
     public void DecrementFitnessOnBorder()
@@ -88,6 +88,13 @@ public class NeuralNetController : MonoBehaviour
     {
         fitnessScore -= 5f;
     }
+
+    public void ApplyBorderPenalty()
+    {
+        fitnessScore -= 5f; // -5 points pour une collision avec le "Border"
+        //Debug.Log("Pénalité de -5 appliquée pour collision avec le Border. Score de fitness actuel : " + fitnessScore);
+    }
+
 
     public void ResetFitness()
     {
@@ -182,7 +189,7 @@ public class NeuralNetController : MonoBehaviour
     {
         int actionIndex = 0;
         float maxOutput = outputLayer[0];
-        for (int i = 1; i < outputLayer.Length; i++)
+        for (int i = 1; i < 3; i++) // Remplacer par "3" pour limiter aux trois actions
         {
             if (outputLayer[i] > maxOutput)
             {
@@ -192,6 +199,7 @@ public class NeuralNetController : MonoBehaviour
         }
         return actionIndex;
     }
+
 
     public int GetActionIndex()
     {

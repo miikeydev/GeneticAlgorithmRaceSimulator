@@ -10618,7 +10618,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fitnessScores: []
-  mutationRate: 0.2
+  mutationRate: 0.1
 --- !u!4 &1781526498
 Transform:
   m_ObjectHideFlags: 0
