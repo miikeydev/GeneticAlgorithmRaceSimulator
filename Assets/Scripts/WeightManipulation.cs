@@ -5,43 +5,43 @@ using System;
 
 public class WeightManipulation
 {
-    private string directoryPath;
+    private string directoryPath; // Directory path for saving files
 
-    // Constructeur pour définir le dossier de sauvegarde
+    // Constructor to set the save directory
     public WeightManipulation(string folderName)
     {
-        // Définir le chemin du dossier dans les données persistantes de l'application
+        // Define the path in the application's persistent data
         directoryPath = Path.Combine(Application.persistentDataPath, folderName);
 
-        // Crée le dossier s'il n'existe pas déjà
+        // Create the directory if it doesn't exist
         if (!Directory.Exists(directoryPath))
         {
             Directory.CreateDirectory(directoryPath);
         }
     }
 
-    // Méthode pour sauvegarder les meilleurs poids avec le nom de la génération
+    // Method to save the best weights with the generation name
     public void SaveWeights(float[] bestWeights, int generationNumber)
     {
-        // Crée un nom de fichier basé sur le numéro de la génération
-        string fileName = $"meilleur_modele_generation{generationNumber}.txt";
+        // Create a filename based on the generation number
+        string fileName = $"best_model_generation{generationNumber}.txt";
         string filePath = Path.Combine(directoryPath, fileName);
 
         using (StreamWriter writer = new StreamWriter(filePath))
         {
-            // Convertir les poids en une ligne de texte
+            // Convert weights to a single line of text
             string line = string.Join(",", bestWeights);
             writer.WriteLine(line);
         }
 
-        Debug.Log($"Les poids ont été sauvegardés dans {filePath}");
+        Debug.Log($"Weights have been saved to {filePath}");
     }
 
-    // Méthode pour charger les poids d'un fichier spécifique
+    // Method to load weights from a specific file
     public float[] LoadWeights(int generationNumber)
     {
-        // Crée le nom de fichier basé sur le numéro de la génération
-        string fileName = $"meilleur_modele_generation{generationNumber}.txt";
+        // Create the filename based on the generation number
+        string fileName = $"best_model_generation{generationNumber}.txt";
         string filePath = Path.Combine(directoryPath, fileName);
 
         if (File.Exists(filePath))
@@ -51,17 +51,17 @@ public class WeightManipulation
                 string line = reader.ReadLine();
                 if (line != null)
                 {
-                    // Convertir la ligne de texte en tableau de float
+                    // Convert the text line to a float array
                     string[] weightStrings = line.Split(',');
                     float[] weights = Array.ConvertAll(weightStrings, float.Parse);
-                    Debug.Log($"Les poids ont été chargés depuis {filePath}");
+                    Debug.Log($"Weights have been loaded from {filePath}");
                     return weights;
                 }
             }
         }
         else
         {
-            Debug.LogWarning($"Le fichier {filePath} n'existe pas.");
+            Debug.LogWarning($"The file {filePath} does not exist.");
         }
 
         return null;

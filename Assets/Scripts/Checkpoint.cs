@@ -2,27 +2,27 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
-    private GameManager gameManager;
+    private GameManager gameManager; // Reference to the GameManager
 
     private void Start()
     {
-        // Trouve le GameManager dans la scène
+        // Find the GameManager in the scene
         gameManager = FindObjectOfType<GameManager>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        // Vérifie si l'objet qui entre en collision a le tag "Truck"
+        // Check if the object colliding has the tag "Truck"
         if (other.CompareTag("Truck"))
         {
-            // Incrémenter la fonction de fitness via le GameManager
+            // Increment fitness via GameManager if available
             if (gameManager != null && gameManager.neuralNetController != null)
             {
                 gameManager.neuralNetController.IncrementFitness();
-                gameManager.OnCheckpointTouched(); // Réinitialise le timer dans le GameManager
+                gameManager.OnCheckpointTouched(); // Reset the checkpoint timer in GameManager
             }
 
-            // Fait disparaître le checkpoint en le désactivant
+            // Disable the checkpoint to make it disappear
             gameObject.SetActive(false);
         }
     }

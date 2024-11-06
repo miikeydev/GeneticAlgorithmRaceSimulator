@@ -2,40 +2,39 @@ using UnityEngine;
 
 public class NeuralNetController : MonoBehaviour
 {
-    public TruckController truckController; // Référence au script TruckController
+    public TruckController truckController; // Reference to the TruckController script
     public GameManager gameManager;
 
-    // Configuration du réseau de neurones
+    // Neural network configuration
     public int InputSize { get; private set; }
     public int HiddenLayerSize { get; private set; } = 64;
     public int OutputSize { get; private set; } = 3;
 
-    // Modèle de réseau de neurones
-    private float[,] weightsInputToHidden;
-    private float[] biasesHidden;
-    private float[,] weightsHiddenToOutput;
-    private float[] biasesOutput;
-    private float[] hiddenLayer;
-    private float[] outputLayer;
+    // Neural network model
+    private float[,] weightsInputToHidden; // Weights between input and hidden layer
+    private float[] biasesHidden; // Biases for hidden layer
+    private float[,] weightsHiddenToOutput; // Weights between hidden and output layer
+    private float[] biasesOutput; // Biases for output layer
+    private float[] hiddenLayer; // Activations of hidden layer
+    private float[] outputLayer; // Activations of output layer
 
-    // Fonction de fitness
+    // Fitness function score
     private float fitnessScore = 0f;
 
     void Start()
     {
         float[] raycastData = truckController.GetRaycastData();
-        InputSize = raycastData.Length + 1; // Nombre de raycasts + vitesse
+        InputSize = raycastData.Length + 1; // Number of raycasts + speed
 
         hiddenLayer = new float[HiddenLayerSize];
         outputLayer = new float[OutputSize];
     }
 
-    // Méthode pour initialiser les poids depuis le GeneticAlgorithm
+    // Method to initialize weights from the GeneticAlgorithm
     public void InitializeWeights(float[] allWeights)
     {
-        // Reconstruct the weights and biases from the flat array
+        // Reconstruct weights and biases from a flat array
         int index = 0;
-
 
         // Initialize weightsInputToHidden
         weightsInputToHidden = new float[InputSize, HiddenLayerSize];
@@ -72,8 +71,7 @@ public class NeuralNetController : MonoBehaviour
         }
     }
 
-
-    // Méthodes pour gérer la fonction de fitness
+    // Methods to manage fitness scoring
     public void IncrementFitness()
     {
         fitnessScore += 4f;
@@ -81,7 +79,7 @@ public class NeuralNetController : MonoBehaviour
 
     public void DecrementFitnessOnBorder()
     {
-        fitnessScore -= 1f; // -1 point pour toucher le tag "Border"
+        fitnessScore -= 1f; // -1 point for touching the "Border" tag
     }
 
     public void ApplyEndEpisodePenalty()
@@ -91,30 +89,29 @@ public class NeuralNetController : MonoBehaviour
 
     public void ApplyBorderPenalty()
     {
-        fitnessScore -= 5f; // -5 points pour une collision avec le "Border"
-        //Debug.Log("Pénalité de -5 appliquée pour collision avec le Border. Score de fitness actuel : " + fitnessScore);
+        fitnessScore -= 5f; // -5 points for a collision with the "Border"
+        //Debug.Log("Penalty of -5 applied for Border collision. Current fitness score: " + fitnessScore);
     }
-
 
     public void ResetFitness()
     {
         fitnessScore = 0f;
     }
 
-    public float GetFitnessScore() // Changer en float
+    public float GetFitnessScore() // Return fitness score
     {
         return fitnessScore;
     }
 
-    // Méthode pour obtenir les poids sous forme de tableau à une dimension
+    // Method to obtain weights as a 1D array for storage
     public float[] GetWeights()
     {
-        // Convertir les poids en un tableau à une dimension pour le stockage
+        // Convert weights to a 1D array for storage
         int totalSize = (InputSize * HiddenLayerSize) + HiddenLayerSize + (HiddenLayerSize * OutputSize) + OutputSize;
         float[] allWeights = new float[totalSize];
         int index = 0;
 
-        // Convertir weightsInputToHidden
+        // Convert weightsInputToHidden
         for (int i = 0; i < InputSize; i++)
         {
             for (int j = 0; j < HiddenLayerSize; j++)
@@ -123,13 +120,13 @@ public class NeuralNetController : MonoBehaviour
             }
         }
 
-        // Convertir biasesHidden
+        // Convert biasesHidden
         for (int i = 0; i < HiddenLayerSize; i++)
         {
             allWeights[index++] = biasesHidden[i];
         }
 
-        // Convertir weightsHiddenToOutput
+        // Convert weightsHiddenToOutput
         for (int i = 0; i < HiddenLayerSize; i++)
         {
             for (int j = 0; j < OutputSize; j++)
@@ -138,7 +135,7 @@ public class NeuralNetController : MonoBehaviour
             }
         }
 
-        // Convertir biasesOutput
+        // Convert biasesOutput
         for (int i = 0; i < OutputSize; i++)
         {
             allWeights[index++] = biasesOutput[i];
@@ -147,6 +144,7 @@ public class NeuralNetController : MonoBehaviour
         return allWeights;
     }
 
+    // Collect inputs for the network (raycast data + speed)
     float[] CollectInputs()
     {
         float[] raycastData = truckController.GetRaycastData();
@@ -161,6 +159,7 @@ public class NeuralNetController : MonoBehaviour
         return inputs;
     }
 
+    // Perform matrix multiplication for network layers
     float[] MatrixMultiply(float[] inputs, float[,] weights, float[] biases)
     {
         int rows = weights.GetLength(1);
@@ -168,7 +167,7 @@ public class NeuralNetController : MonoBehaviour
 
         for (int i = 0; i < rows; i++)
         {
-            output[i] = biases[i]; // Commence par le biais
+            output[i] = biases[i]; // Start with bias
             for (int j = 0; j < inputs.Length; j++)
             {
                 output[i] += inputs[j] * weights[j, i];
@@ -177,19 +176,21 @@ public class NeuralNetController : MonoBehaviour
         return output;
     }
 
+    // Apply ReLU activation function
     void ApplyActivationFunction(float[] layer)
     {
         for (int i = 0; i < layer.Length; i++)
         {
-            layer[i] = Mathf.Max(0, layer[i]); // ReLU pour la non-linéarité
+            layer[i] = Mathf.Max(0, layer[i]); // ReLU for non-linearity
         }
     }
 
+    // Select action based on output layer values
     int SelectAction()
     {
         int actionIndex = 0;
         float maxOutput = outputLayer[0];
-        for (int i = 1; i < 3; i++) // Remplacer par "3" pour limiter aux trois actions
+        for (int i = 1; i < 3; i++) // Limited to three actions
         {
             if (outputLayer[i] > maxOutput)
             {
@@ -200,12 +201,11 @@ public class NeuralNetController : MonoBehaviour
         return actionIndex;
     }
 
-
     public int GetActionIndex()
     {
         float[] inputs = CollectInputs();
 
-        // Propagation avant (Forward Propagation)
+        // Forward propagation
         hiddenLayer = MatrixMultiply(inputs, weightsInputToHidden, biasesHidden);
         ApplyActivationFunction(hiddenLayer);
 

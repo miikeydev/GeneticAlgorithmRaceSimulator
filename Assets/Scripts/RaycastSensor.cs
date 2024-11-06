@@ -2,43 +2,43 @@ using UnityEngine;
 
 public class RaycastSensor : MonoBehaviour
 {
-    [Header("Paramètres des Raycasts")]
-    public Transform raycastOrigin; // GameObject enfant pour lancer les rayons autour du cube
-    public float rayDistance = 10f; // Distance maximale des raycasts
-    public LayerMask detectionLayer; // Layer des objets que le raycast doit détecter
+    [Header("Raycast Parameters")]
+    public Transform raycastOrigin; // Child GameObject to emit rays around the cube
+    public float rayDistance = 10f; // Maximum raycast distance
+    public LayerMask detectionLayer; // Layer to detect with the raycasts
 
-    private float[] raycastData; // Tableau pour stocker les distances et les valeurs de tags
+    private float[] raycastData; // Array to store distances and tag values of detected objects
 
     void Start()
     {
-        // Initialiser le tableau avec le double du nombre de raycasts (pour inclure les distances et les tags)
+        // Initialize the array with twice the number of raycasts (for distance and tag values)
         raycastData = new float[16]; // 8 raycasts * 2 (distance + tag)
     }
 
     void Update()
     {
-        // Directions horizontales autour du cube (0° d'inclinaison)
+        // Set horizontal directions around the cube (0° vertical angle)
         Vector3[] directions = {
-            raycastOrigin.TransformDirection(Quaternion.Euler(0, -30, 0) * Vector3.forward), // Avant gauche
-            raycastOrigin.TransformDirection(Quaternion.Euler(0, 0, 0) * Vector3.forward),    // Avant centre
-            raycastOrigin.TransformDirection(Quaternion.Euler(0, 30, 0) * Vector3.forward),   // Avant droite
-            raycastOrigin.TransformDirection(Quaternion.Euler(0, -90, 0) * Vector3.forward),  // Gauche 1
-            raycastOrigin.TransformDirection(Quaternion.Euler(0, -120, 0) * Vector3.forward), // Gauche 2
-            raycastOrigin.TransformDirection(Quaternion.Euler(0, 90, 0) * Vector3.forward),   // Droite 1
-            raycastOrigin.TransformDirection(Quaternion.Euler(0, 120, 0) * Vector3.forward),  // Droite 2
-            raycastOrigin.TransformDirection(Quaternion.Euler(0, 180, 0) * Vector3.forward)   // Arrière
+            raycastOrigin.TransformDirection(Quaternion.Euler(0, -30, 0) * Vector3.forward), // Front left
+            raycastOrigin.TransformDirection(Quaternion.Euler(0, 0, 0) * Vector3.forward),    // Front center
+            raycastOrigin.TransformDirection(Quaternion.Euler(0, 30, 0) * Vector3.forward),   // Front right
+            raycastOrigin.TransformDirection(Quaternion.Euler(0, -90, 0) * Vector3.forward),  // Left 1
+            raycastOrigin.TransformDirection(Quaternion.Euler(0, -120, 0) * Vector3.forward), // Left 2
+            raycastOrigin.TransformDirection(Quaternion.Euler(0, 90, 0) * Vector3.forward),   // Right 1
+            raycastOrigin.TransformDirection(Quaternion.Euler(0, 120, 0) * Vector3.forward),  // Right 2
+            raycastOrigin.TransformDirection(Quaternion.Euler(0, 180, 0) * Vector3.forward)   // Rear
         };
 
-        // Effectue les raycasts et met à jour les données
+        // Perform raycasts and update data
         for (int i = 0; i < directions.Length; i++)
         {
             RaycastHit hit;
             UpdateRaycastData(i * 2, directions[i], out hit);
 
-            // Choisir la couleur du rayon en fonction de la détection
+            // Select ray color based on detected object tag
             Color rayColor = hit.collider != null ? GetRayColor(hit.collider.tag) : Color.red;
 
-            // Dessiner le rayon jusqu'au point d'impact ou jusqu'à sa distance maximale
+            // Draw the ray up to the hit point or to max distance if no collision
             Vector3 endPosition = hit.collider != null ? hit.point : raycastOrigin.position + directions[i] * rayDistance;
             Debug.DrawLine(raycastOrigin.position, endPosition, rayColor);
         }
@@ -46,20 +46,22 @@ public class RaycastSensor : MonoBehaviour
 
     void UpdateRaycastData(int index, Vector3 direction, out RaycastHit hit)
     {
+        // Perform raycast from raycastOrigin in the specified direction
         if (Physics.Raycast(raycastOrigin.position, direction, out hit, rayDistance, detectionLayer))
         {
-            raycastData[index] = hit.distance;
-            raycastData[index + 1] = GetTagValue(hit.collider.tag);
+            raycastData[index] = hit.distance; // Store distance of hit
+            raycastData[index + 1] = GetTagValue(hit.collider.tag); // Store value associated with detected tag
         }
         else
         {
-            raycastData[index] = rayDistance; // Si rien n'est détecté, on enregistre la distance max
-            raycastData[index + 1] = 0f; // Aucun tag
+            raycastData[index] = rayDistance; // Max distance if no hit
+            raycastData[index + 1] = 0f; // Default value if no tag detected
         }
     }
 
     private float GetTagValue(string tag)
     {
+        // Return a specific value for each tag
         switch (tag)
         {
             case "Circuit":
@@ -75,6 +77,7 @@ public class RaycastSensor : MonoBehaviour
 
     private Color GetRayColor(string tag)
     {
+        // Return a specific color for each tag
         switch (tag)
         {
             case "Circuit":
@@ -90,6 +93,7 @@ public class RaycastSensor : MonoBehaviour
 
     public float[] GetRaycastData()
     {
+        // Public method to access the raycast data
         return raycastData;
     }
 }
