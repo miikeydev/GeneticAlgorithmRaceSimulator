@@ -10,7 +10,6 @@ Welcome to the **Genetic Algorithm Race Simulator**! This Unity project implemen
 - [How It Works](#how-it-works)
 - [Configuration Options](#configuration-options)
 - [Requirements](#requirements)
-- [License](#license)
 
 ## 🌟 Features
 
